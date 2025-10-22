@@ -1,4 +1,4 @@
-package de.tim.tracerbackend;
+package de.tim.tracerbackend.model;
 
 import java.time.Instant;
 import java.util.ArrayList;

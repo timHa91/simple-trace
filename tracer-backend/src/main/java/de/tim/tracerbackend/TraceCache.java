@@ -1,6 +1,8 @@
 package de.tim.tracerbackend;
 
 import de.tim.tracerbackend.dto.TraceDto;
+import de.tim.tracerbackend.model.Span;
+import de.tim.tracerbackend.model.TraceTree;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;

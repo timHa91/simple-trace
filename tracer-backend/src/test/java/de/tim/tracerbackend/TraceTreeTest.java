@@ -1,5 +1,7 @@
 package de.tim.tracerbackend;
 
+import de.tim.tracerbackend.model.Span;
+import de.tim.tracerbackend.model.TraceTree;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;

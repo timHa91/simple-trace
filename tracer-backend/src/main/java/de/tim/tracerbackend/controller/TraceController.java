@@ -1,6 +1,9 @@
-package de.tim.tracerbackend;
+package de.tim.tracerbackend.controller;
 
 import de.tim.tracerbackend.dto.SpanDto;
+import de.tim.tracerbackend.model.Span;
+import de.tim.tracerbackend.service.TraceService;
+import de.tim.tracerbackend.model.TraceTree;
 import de.tim.tracerbackend.dto.TraceDto;
 import de.tim.tracerbackend.dto.TraceTreeDto;
 import org.springframework.http.HttpStatus;

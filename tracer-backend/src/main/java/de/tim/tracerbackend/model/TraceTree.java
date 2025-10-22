@@ -1,4 +1,4 @@
-package de.tim.tracerbackend;
+package de.tim.tracerbackend.model;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -8,8 +8,8 @@ public class TraceTree {
 
     private final String traceId;
     private Span root;
-    private List<Span> spans = new ArrayList<>();
-    private List<Span> orphanSpans = new ArrayList<>();
+    private final List<Span> spans = new ArrayList<>();
+    private final List<Span> orphanSpans = new ArrayList<>();
 
     public TraceTree(String traceId) {
         this.traceId = traceId;

@@ -1,5 +1,7 @@
-package de.tim.tracerbackend;
+package de.tim.tracerbackend.service;
 
+import de.tim.tracerbackend.TraceCache;
+import de.tim.tracerbackend.model.TraceTree;
 import de.tim.tracerbackend.dto.TraceDto;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +27,6 @@ public class TraceService {
         if (traceDto.status() != null && (traceDto.status() >= 400 || traceDto.status() < 0)) {
             metricsService.recordSpanError(traceDto.serviceName());
         }
-
     }
 
     public Optional<TraceTree> findTrace(String traceId) {
@@ -34,7 +35,7 @@ public class TraceService {
 
         traceTree.buildTree();
 
-       traceTree.getOrphanSpans().forEach(o -> metricsService.recordOrphanedSpan(o.getServiceName()));
+        traceTree.getOrphanSpans().forEach(o -> metricsService.recordOrphanedSpan(o.getServiceName()));
 
         return Optional.of(traceTree);
     }

@@ -1,4 +1,4 @@
-package de.tim.tracerbackend;
+package de.tim.tracerbackend.service;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Service;
