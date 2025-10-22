@@ -33,6 +33,7 @@ public class TraceTree {
 
         Map<String, List<Span>> parentToChildrenMapping = new HashMap<>();
 
+        // 1. Creating Parent to Child Mapping
         for (var span : spans) {
             boolean isRootSpan = span.getParentId() == null;
             if (isRootSpan) {
@@ -50,6 +51,7 @@ public class TraceTree {
             }
         }
 
+        // 2. Setting children at existing Spans
         for (var span : spans) {
             span.setChildren(parentToChildrenMapping.getOrDefault(span.getId(), new ArrayList<>()));
         }
