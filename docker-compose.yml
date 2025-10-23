@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: trace_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  tracer-backend:
+    build: ./tracer-backend
+    ports:
+      - 8080:8080
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  service-a:
+    build: ./service-a
+    ports:
+      - 8081:8081
+    environment:
+      TRACER_BACKEND_URL: http://tracer-backend/api/traces
+      SERVICE_B_URL: http://service-b:8082
+
+  service-b:
+    build: ./service-b
+    ports:
+      - 8082:8082
+    environment:
+      TRACER_BACKEND_URL: http://tracer-backend:8080/api/traces
+      SERVICE_C_URL: http://service-c:8083
+
+  service-c:
+    build: ./service-c
+    ports:
+      - 8083:8083
+    environment:
+      TRACER_BACKEND_URL: http://tracer-backend:8080/api/traces
+
+volumes:
+  pgdata:

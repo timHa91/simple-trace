@@ -38,3 +38,9 @@ replay_pid*
 # OS
 .DS_Store
 Thumbs.db
+
+# env
+.env
+.env.production
+.env.staging
+*.secret
