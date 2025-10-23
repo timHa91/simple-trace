@@ -8,25 +8,25 @@ public class TraceTree {
 
     private final String traceId;
     private Span root;
-    private final List<Span> spans = new ArrayList<>();
+    private final List<Span> spans;
     private final List<Span> orphanSpans = new ArrayList<>();
 
-    public TraceTree(String traceId) {
+    private TraceTree(String traceId, List<Span> spans) {
         this.traceId = traceId;
+        this.spans = spans;
     }
 
-    public void add(Span span) {
-        if (span == null || spans.contains(span)) {
-            return;
-        }
-        spans.add(span);
+    public static TraceTree build(String traceId, List<Span> spans) {
+        var tree = new TraceTree(
+                traceId,
+                spans
+        );
+        tree.buildTree();
+
+        return tree;
     }
 
-    public void buildTree() {
-        if (spans.isEmpty()) {
-            return;
-        }
-
+    private void buildTree() {
         Set<String> existingSpanIds = spans.stream()
                 .map(Span::getId)
                 .collect(Collectors.toSet());
@@ -89,15 +89,10 @@ public class TraceTree {
     public String getTraceId() {
         return traceId;
     }
-
     public Span getRoot() {
         return root;
     }
-
-    public List<Span> getSpans() {
-        return spans;
-    }
-
+    public List<Span> getSpans() {return spans;}
     public List<Span> getOrphanSpans() {
         return orphanSpans;
     }
