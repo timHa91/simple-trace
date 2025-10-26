@@ -38,15 +38,16 @@ public class TraceTree {
             boolean isRootSpan = span.getParentId() == null;
             if (isRootSpan) {
                 root = span;
+                continue;
+            }
+
+            boolean parentSpanDoesNotExist = !existingSpanIds.contains(span.getParentId());
+            if (parentSpanDoesNotExist) {
+                this.orphanSpans.add(span);
             } else {
-                boolean parentSpanDoesNotExist = !existingSpanIds.contains(span.getParentId());
-                if (parentSpanDoesNotExist) {
-                    this.orphanSpans.add(span);
-                } else {
-                    parentToChildrenMapping
-                            .computeIfAbsent(span.getParentId(), v -> new ArrayList<>())
-                            .add(span);
-                }
+                parentToChildrenMapping
+                        .computeIfAbsent(span.getParentId(), v -> new ArrayList<>())
+                        .add(span);
             }
         }
 
