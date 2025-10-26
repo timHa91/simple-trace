@@ -43,6 +43,9 @@ public class Span {
     @Column(name = "type", nullable = false, updatable = false)
     private String type;
 
+    @Column(name = "pinned")
+    private boolean pinned;
+
     @Transient
     private List<Span> children = new ArrayList<>();
 
@@ -67,6 +70,7 @@ public class Span {
         this.duration = duration;
         this.errorMessage = errorMessage;
         this.type = type;
+        this.pinned = false;
     }
 
     protected Span() {}
@@ -79,6 +83,10 @@ public class Span {
         this.children = children;
     }
 
+    public void setPinned() {
+        this.pinned = true;
+    }
+
     @Override
     public String toString() {
         return  serviceName + " [" + type + "] " + operation + " (" + duration + "ms)";
@@ -87,42 +95,33 @@ public class Span {
     public String getId() {
         return id;
     }
-
     public String getTraceId() { return traceId; }
-
     public String getParentId() {
         return parentId;
     }
-
     public String getServiceName() {
         return serviceName;
     }
-
     public String getOperation() {
         return operation;
     }
-
     public Integer getStatus() {
         return status;
     }
-
     public Instant getTimestamp() {
         return timestamp;
     }
-
     public long getDuration() {
         return duration;
     }
-
     public String getErrorMessage() {
         return errorMessage;
     }
-
     public String getType() {
         return type;
     }
-
     public List<Span> getChildren() {
         return children;
     }
+    public boolean isPinned() {return pinned;}
 }

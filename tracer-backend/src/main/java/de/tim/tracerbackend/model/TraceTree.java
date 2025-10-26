@@ -40,7 +40,6 @@ public class TraceTree {
                 root = span;
             } else {
                 boolean parentSpanDoesNotExist = !existingSpanIds.contains(span.getParentId());
-
                 if (parentSpanDoesNotExist) {
                     this.orphanSpans.add(span);
                 } else {
