@@ -32,6 +32,26 @@ public class SpanTestBuilder {
         return this;
     }
 
+    public SpanTestBuilder operation(String operation) {
+        this.operation = operation;
+        return this;
+    }
+
+    public SpanTestBuilder parentId(String parentId) {
+        this.parentId = parentId;
+        return this;
+    }
+
+    public SpanTestBuilder serviceName(String serviceName) {
+        this.serviceName = serviceName;
+        return this;
+    }
+
+    public SpanTestBuilder type(String type) {
+        this.type = type;
+        return this;
+    }
+
     public Span build() {
         return new Span(
                 id,

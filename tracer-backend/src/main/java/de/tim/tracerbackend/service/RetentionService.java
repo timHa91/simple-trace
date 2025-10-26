@@ -19,9 +19,9 @@ public class RetentionService {
 
     @Scheduled(cron = "*/10 * * * * *")
     @Transactional
-    public void runNightlyRetention() {
+    public long runNightlyRetention() {
         Instant cutoff = Instant.now().minus(7, ChronoUnit.DAYS);
 
-        spanRepository.deleteByTimestampBeforeAndPinnedFalse(cutoff);
+        return spanRepository.deleteByTimestampBeforeAndPinnedFalse(cutoff);
     }
 }

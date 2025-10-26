@@ -83,7 +83,7 @@ public class Span {
         this.children = children;
     }
 
-    public void setPinned() {
+    public void markAsPinned() {
         this.pinned = true;
     }
 
