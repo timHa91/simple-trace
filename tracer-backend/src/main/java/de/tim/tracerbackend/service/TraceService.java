@@ -36,7 +36,8 @@ public class TraceService {
 
         metricsService.recordSpanReceived(traceDto.serviceName());
         metricsService.recordSpanDuration(traceDto.serviceName(), traceDto.duration());
-        if (traceDto.status() != null && (traceDto.status() >= 400 || traceDto.status() < 0)) {
+        boolean isErrorStatus = traceDto.status() != null && (traceDto.status() >= 400 || traceDto.status() < 0);
+        if (isErrorStatus) {
             metricsService.recordSpanError(traceDto.serviceName());
         }
     }

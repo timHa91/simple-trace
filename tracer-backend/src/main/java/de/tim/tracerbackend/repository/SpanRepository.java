@@ -10,6 +10,5 @@ import java.util.List;
 @Repository
 public interface SpanRepository extends JpaRepository<Span, String> {
     List<Span> findByTraceId(String traceId);
-
     long deleteByTimestampBeforeAndPinnedFalse(Instant cutoff);
 }
