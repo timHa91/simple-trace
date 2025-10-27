@@ -3,6 +3,8 @@ package de.tim.tracerbackend.model;
 import de.tim.tracerbackend.SpanTestBuilder;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -107,8 +109,8 @@ class TraceTreeTest {
                 .build();
 
 
-        return List.of(rootSpan, serviceCInbound, serviceBInbound,
-                serviceAOutbound, serviceBOutbound);
+        return new ArrayList<>(
+                Arrays.asList(rootSpan, serviceCInbound, serviceBInbound, serviceAOutbound, serviceBOutbound));
     }
 
 }

@@ -8,19 +8,16 @@ services:
       POSTGRES_DB: trace_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
     volumes:
       - pgdata:/var/lib/postgresql/data
 
   tracer-backend:
     build: ./tracer-backend
+    restart: on-failure
     ports:
       - 8080:8080
     environment:
+      SPRING_KAFKA_BOOTSTRAP: "kafka:9092"
       SPRING_DATASOURCE_URL: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
@@ -29,29 +26,61 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      kafka:
+        condition: service_started
 
   service-a:
     build: ./service-a
+    restart: on-failure
     ports:
       - 8081:8081
     environment:
-      TRACER_BACKEND_URL: http://tracer-backend/api/traces
+      SPRING_KAFKA_BOOTSTRAP: "kafka:9092"
       SERVICE_B_URL: http://service-b:8082
+    depends_on:
+      - kafka
 
   service-b:
     build: ./service-b
+    restart: on-failure
     ports:
       - 8082:8082
     environment:
-      TRACER_BACKEND_URL: http://tracer-backend:8080/api/traces
+      SPRING_KAFKA_BOOTSTRAP: "kafka:9092"
       SERVICE_C_URL: http://service-c:8083
+    depends_on:
+      - kafka
 
   service-c:
     build: ./service-c
+    restart: on-failure
     ports:
       - 8083:8083
     environment:
-      TRACER_BACKEND_URL: http://tracer-backend:8080/api/traces
+      SPRING_KAFKA_BOOTSTRAP: "kafka:9092"
+    depends_on:
+      - kafka
+
+  kafka:
+    image: confluentinc/cp-kafka:7.8.0
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka:9092,CONTROLLER://kafka:29093'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
 
 volumes:
   pgdata:

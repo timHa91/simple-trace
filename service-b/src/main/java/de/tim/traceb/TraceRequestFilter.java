@@ -18,10 +18,10 @@ public class TraceRequestFilter extends OncePerRequestFilter {
     @Value("${service.name}")
     private String serviceName;
 
-    private final TraceExportService traceExportService;
+    private final SpanEventProducer producer;
 
-    public TraceRequestFilter(TraceExportService traceExportService) {
-        this.traceExportService = traceExportService;
+    public TraceRequestFilter(SpanEventProducer producer) {
+        this.producer = producer;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class TraceRequestFilter extends OncePerRequestFilter {
                     null
             );
 
-            traceExportService.export(inboundSpan);
+            producer.sendEvent(inboundSpan);
             TraceContext.clearAll();
         }
     }
