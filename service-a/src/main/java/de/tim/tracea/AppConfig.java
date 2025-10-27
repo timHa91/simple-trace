@@ -20,10 +20,10 @@ public class AppConfig {
     @Value("${service.name}")
     private String serviceName;
 
-    private final TraceExportService exportService;
+    private final SpanEventProducer producer;
 
-    public AppConfig(TraceExportService exportService) {
-        this.exportService = exportService;
+    public AppConfig(SpanEventProducer producer) {
+        this.producer = producer;
     }
 
     @Bean
@@ -80,7 +80,7 @@ public class AppConfig {
                         "outbound",
                         errorMessage
                 );
-                exportService.export(trace);
+                producer.sendEvent(trace);
 
                 TraceContext.setCurrentSpanId(parentSpanId);
             }
