@@ -111,9 +111,7 @@ public class Span {
     public Instant getTimestamp() {
         return timestamp;
     }
-    public long getDuration() {
-        return duration;
-    }
+    public long getDuration() {return duration;}
     public String getErrorMessage() {
         return errorMessage;
     }

@@ -1,16 +1,18 @@
 package de.tim.tracerbackend.controller;
 
-import de.tim.tracerbackend.dto.SpanDto;
+import de.tim.tracerbackend.dto.*;
 import de.tim.tracerbackend.model.Span;
-import de.tim.tracerbackend.service.TraceService;
+import de.tim.tracerbackend.model.TraceSummary;
 import de.tim.tracerbackend.model.TraceTree;
-import de.tim.tracerbackend.dto.TraceDto;
-import de.tim.tracerbackend.dto.TraceTreeDto;
+import de.tim.tracerbackend.service.TraceService;
+import de.tim.tracerbackend.specification.TraceFilterSpecification;
+import de.tim.tracerbackend.specification.TraceSortSpecification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -28,6 +30,37 @@ public class TraceController {
         traceService.addTrace(traceDto);
 
         return ResponseEntity.accepted().build();
+    }
+    
+    @GetMapping("/errors")
+    ResponseEntity<List<TraceSummaryDto>> getAllTracesWithError(
+            @RequestParam(required = false) String serviceName,
+            @RequestParam(required = false) Long minDuration,
+            @RequestParam(defaultValue = "DURATION") SortField sortBy,
+            @RequestParam(defaultValue = "DESC") SortOrder sortOrder
+    ) {
+        var summaries = traceService.findAllTracesAsSummary(
+                TraceFilterSpecification.createError(serviceName, minDuration),
+                TraceSortSpecification.create(sortBy, sortOrder)
+        );
+
+        return ResponseEntity.ok(summaries.stream().map(this::mapToDto).toList());
+    }
+
+    @GetMapping
+    ResponseEntity<List<TraceSummaryDto>> getAllTraces(
+            @RequestParam(required = false) String serviceName,
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) Long minDuration,
+            @RequestParam(defaultValue = "DURATION") SortField sortBy,
+            @RequestParam(defaultValue = "DESC") SortOrder sortOrder
+    ) {
+        var filterSpec = TraceFilterSpecification.create(serviceName, status, minDuration);
+        var sortSpec = TraceSortSpecification.create(sortBy, sortOrder);
+
+        var summaries = traceService.findAllTracesAsSummary(filterSpec, sortSpec);
+
+        return ResponseEntity.ok(summaries.stream().map(this::mapToDto).toList());
     }
 
     @GetMapping("{id}")
@@ -58,6 +91,8 @@ public class TraceController {
         return traceTree.printTree();
     }
 
+    // ==== Mapping ====
+
     private TraceTreeDto mapToDto(TraceTree traceTree) {
         SpanDto rootDto = traceTree.getRoot() != null
                 ? mapToDto(traceTree.getRoot())
@@ -80,6 +115,16 @@ public class TraceController {
                 span.getErrorMessage(),
                 span.getType(),
                 span.getChildren().stream().map(this::mapToDto).toList()
+        );
+    }
+
+    private TraceSummaryDto mapToDto(TraceSummary summary) {
+        return new TraceSummaryDto(
+                summary.getTraceId(),
+                summary.getTotalDuration(),
+                summary.getServices(),
+                summary.getSpanCount(),
+                summary.getOverallStatus()
         );
     }
 }

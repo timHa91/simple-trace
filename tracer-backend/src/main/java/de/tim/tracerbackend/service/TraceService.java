@@ -1,8 +1,11 @@
 package de.tim.tracerbackend.service;
 
-import de.tim.tracerbackend.model.Span;
-import de.tim.tracerbackend.model.TraceTree;
+import de.tim.tracerbackend.specification.TraceFilterSpecification;
+import de.tim.tracerbackend.specification.TraceSortSpecification;
 import de.tim.tracerbackend.dto.TraceDto;
+import de.tim.tracerbackend.model.Span;
+import de.tim.tracerbackend.model.TraceSummary;
+import de.tim.tracerbackend.model.TraceTree;
 import de.tim.tracerbackend.repository.SpanRepository;
 import org.springframework.stereotype.Service;
 
@@ -44,14 +47,46 @@ public class TraceService {
 
     public Optional<TraceTree> findTrace(String traceId) {
         var spans =  spanRepository.findByTraceId(traceId);
-
         if (spans.isEmpty()) return Optional.empty();
 
-        var traceTree = TraceTree.build(traceId, spans);;
-
+        var traceTree = TraceTree.build(traceId, spans);
         traceTree.getOrphanSpans().forEach(o -> metricsService.recordOrphanedSpan(o.getServiceName()));
 
         return Optional.of(traceTree);
     }
 
+    public List<TraceSummary> findAllTracesAsSummary(TraceFilterSpecification filterSpec, TraceSortSpecification sortSpec) {
+        var spans = spanRepository.findAll();
+        var traceIdToSummaryMap = createTraceIdToSummaryMap(spans);
+
+        return traceIdToSummaryMap.values().stream()
+                .filter(filterSpec::matches)
+                .sorted(sortSpec.getComparator())
+                .toList();
+    }
+
+    private Map<String, TraceSummary> createTraceIdToSummaryMap(List<Span> spans) {
+        var traceIdToSummaryMap = new HashMap<String, TraceSummary>();
+
+        for (var span : spans) {
+            TraceSummary summary = traceIdToSummaryMap.computeIfAbsent(
+                    span.getTraceId(),
+                    id -> new TraceSummary(
+                            span.getTraceId(),
+                            null,
+                            span.getStatus()
+                    )
+            );
+
+            summary.incrementCount();
+            summary.addService(span.getServiceName());
+            summary.updateOverAllStatus(span.getStatus());
+
+            // Total duration deduce from root span
+            if (span.getParentId() == null) {
+                summary.setTotalDuration(span.getDuration());
+            }
+        }
+        return traceIdToSummaryMap;
+    }
 }
