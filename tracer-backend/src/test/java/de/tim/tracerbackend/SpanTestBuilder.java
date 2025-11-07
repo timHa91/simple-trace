@@ -47,6 +47,16 @@ public class SpanTestBuilder {
         return this;
     }
 
+    public SpanTestBuilder status(int status) {
+        this.statusCode = status;
+        return this;
+    }
+
+    public SpanTestBuilder duration(long duration) {
+        this.duration = duration;
+        return this;
+    }
+
     public SpanTestBuilder type(String type) {
         this.type = type;
         return this;

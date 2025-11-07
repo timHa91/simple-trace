@@ -34,10 +34,10 @@ public class TraceController {
     
     @GetMapping("/errors")
     ResponseEntity<List<TraceSummaryDto>> getAllTracesWithError(
-            @RequestParam(required = false) String serviceName,
-            @RequestParam(required = false) Long minDuration,
-            @RequestParam(defaultValue = "DURATION") SortField sortBy,
-            @RequestParam(defaultValue = "DESC") SortOrder sortOrder
+            @RequestParam(name = "serviceName", required = false) String serviceName,
+            @RequestParam(name = "status", required = false) Long minDuration,
+            @RequestParam(name = "sortBy", defaultValue = "DURATION") SortField sortBy,
+            @RequestParam(name = "sortOrder", defaultValue = "DESC") SortOrder sortOrder
     ) {
         var summaries = traceService.findAllTracesAsSummary(
                 TraceFilterSpecification.createError(serviceName, minDuration),
@@ -49,15 +49,14 @@ public class TraceController {
 
     @GetMapping
     ResponseEntity<List<TraceSummaryDto>> getAllTraces(
-            @RequestParam(required = false) String serviceName,
-            @RequestParam(required = false) Integer status,
-            @RequestParam(required = false) Long minDuration,
-            @RequestParam(defaultValue = "DURATION") SortField sortBy,
-            @RequestParam(defaultValue = "DESC") SortOrder sortOrder
+            @RequestParam(name = "serviceName", required = false) String serviceName,
+            @RequestParam(name = "status", required = false) Integer status,
+            @RequestParam(name = "minDuration", required = false) Long minDuration,
+            @RequestParam(name = "sortBy", defaultValue = "DURATION") SortField sortBy,
+            @RequestParam(name = "sortOrder", defaultValue = "DESC") SortOrder sortOrder
     ) {
         var filterSpec = TraceFilterSpecification.create(serviceName, status, minDuration);
         var sortSpec = TraceSortSpecification.create(sortBy, sortOrder);
-
         var summaries = traceService.findAllTracesAsSummary(filterSpec, sortSpec);
 
         return ResponseEntity.ok(summaries.stream().map(this::mapToDto).toList());
