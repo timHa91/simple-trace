@@ -55,7 +55,7 @@ public class TraceService {
         return Optional.of(traceTree);
     }
 
-    public List<TraceSummary> findAllTracesAsSummary(TraceFilterSpecification filterSpec, TraceSortSpecification sortSpec) {
+    public List<TraceSummary> findAllTraces(TraceFilterSpecification filterSpec, TraceSortSpecification sortSpec) {
         var spans = spanRepository.findAll();
         var traceIdToSummaryMap = createTraceIdToSummaryMap(spans);
 

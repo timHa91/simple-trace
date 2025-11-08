@@ -39,7 +39,7 @@ public class TraceController {
             @RequestParam(name = "sortBy", defaultValue = "DURATION") SortField sortBy,
             @RequestParam(name = "sortOrder", defaultValue = "DESC") SortOrder sortOrder
     ) {
-        var summaries = traceService.findAllTracesAsSummary(
+        var summaries = traceService.findAllTraces(
                 TraceFilterSpecification.createError(serviceName, minDuration),
                 TraceSortSpecification.create(sortBy, sortOrder)
         );
@@ -57,7 +57,7 @@ public class TraceController {
     ) {
         var filterSpec = TraceFilterSpecification.create(serviceName, status, minDuration);
         var sortSpec = TraceSortSpecification.create(sortBy, sortOrder);
-        var summaries = traceService.findAllTracesAsSummary(filterSpec, sortSpec);
+        var summaries = traceService.findAllTraces(filterSpec, sortSpec);
 
         return ResponseEntity.ok(summaries.stream().map(this::mapToDto).toList());
     }

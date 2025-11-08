@@ -6,3 +6,21 @@ export type Trace = {
   duration: number;
   status: TraceStatus;
 };
+
+export type TraceTree = {
+  traceId: string
+  rootSpan: Span
+  orphans: Span[]
+}
+
+export type Span = {
+  serviceName: string
+  operation: string
+  status: number
+  timestamp: string
+  duration: number
+  errorMessage: string
+  type: string
+  children?: Span[]
+}
+
