@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import TraceDetail from '@/views/TraceDetail.vue'
 import NotFound from '@/views/NotFound.vue'
 import HomeView from '@/views/HomeView.vue'
-import TraceList from '@/components/TraceList.vue'
+import TraceList from '@/views/TraceList.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

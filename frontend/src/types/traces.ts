@@ -1,19 +1,19 @@
 export type TraceStatus = "OK" | "ERROR";
 
-export type Trace = {
-  traceId: string;
-  spans: number;
-  duration: number;
-  status: TraceStatus;
-};
+export interface Trace {
+  traceId: string
+  spans: number
+  duration: number
+  status: TraceStatus
+}
 
-export type TraceTree = {
+export interface TraceTree {
   traceId: string
   rootSpan: Span
   orphans: Span[]
 }
 
-export type Span = {
+export interface Span {
   serviceName: string
   operation: string
   status: number

@@ -42,14 +42,17 @@ onBeforeRouteUpdate(async (to) => {
     <div v-else-if="traceTree">
       <h3>{{ traceTree.traceId }}</h3>
       <SpanNode :span="traceTree.rootSpan"/>
+
+      <div v-if="traceTree.orphans.length > 0">
+        <h4>Orphan Spans:</h4>
+        <SpanNode
+          v-for="(orphan, index) in traceTree.orphans"
+          :key="index"
+          :span="orphan"
+        />
+      </div>
     </div>
-    <div v-if="traceTree.orphans.length > 0">
-      <h4>Orphan Spans:</h4>
-      <SpanNode
-        v-for="(orphan, index) in traceTree.orphans"
-        :key="index"
-        :span="orphan"
-      />
+
   </div>
 </template>
 

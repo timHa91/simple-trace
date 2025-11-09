@@ -35,7 +35,7 @@ public class TraceController {
     @GetMapping("/errors")
     ResponseEntity<List<TraceSummaryDto>> getAllTracesWithError(
             @RequestParam(name = "serviceName", required = false) String serviceName,
-            @RequestParam(name = "status", required = false) Long minDuration,
+            @RequestParam(name = "minDuration", required = false) Long minDuration,
             @RequestParam(name = "sortBy", defaultValue = "DURATION") SortField sortBy,
             @RequestParam(name = "sortOrder", defaultValue = "DESC") SortOrder sortOrder
     ) {
