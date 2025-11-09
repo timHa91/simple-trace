@@ -3,20 +3,25 @@ import { computed, onMounted, ref } from 'vue'
 import type { Trace } from '@/types/traces.ts'
 import { traceService } from '@/services/TraceService.ts'
 import type { TraceFilter } from '@/types/filter.ts'
+import type { SortBy, SortOrder } from '@/types/sort.ts'
 
 const traces = ref<Trace[]>([])
 const isLoading = ref(false)
 const error = ref<string | null>(null)
 const filter = ref<TraceFilter>({})
+const sortBy = ref<SortBy>("duration")
+const sortOrder = ref<SortOrder>("desc")
 
-async function loadTraces(applyFilter = false) {
+async function loadTraces() {
   isLoading.value = true
   error.value = null
 
   try {
-    traces.value = applyFilter
-      ? await traceService.getAllFilteredTraces(filter.value)
-      : await traceService.getAllTraces()
+    traces.value = await traceService.getAllFilteredTraces(
+      filter.value,
+      sortBy.value,
+      sortOrder.value
+    )
   } catch (err) {
     error.value = 'Failed to load traces: ' + (err instanceof Error ? err.message : String(err))
   } finally {
@@ -32,6 +37,15 @@ function resetFilter() {
 const isFilterActive = computed(() => {
   return filter.value.status || filter.value.serviceName || filter.value.minDuration
 })
+
+function setSortField(value: SortBy) {
+    if (sortBy.value === value) {
+      sortOrder.value = sortOrder.value === "desc" ? "asc" : "desc"
+    } else {
+      sortBy.value = value
+    }
+    loadTraces()
+}
 
 onMounted(() => {
   loadTraces()
@@ -64,23 +78,35 @@ onMounted(() => {
       />
 
       <!-- Filter Buttons -->
-      <button @click="loadTraces(true)" :disabled="!isFilterActive || isLoading">Apply</button>
+      <button @click="loadTraces()" :disabled="!isFilterActive || isLoading">Apply</button>
       <button @click="resetFilter">Reset</button>
     </div>
-
     <!-- Empty-State -->
-    <div v-if="!isLoading && traces.length === 0">
-      No traces found. Try adjusting your filters.
-    </div>
+    <div v-if="!isLoading && traces.length === 0">No traces found. Try adjusting your filters.</div>
 
     <!-- Trace-Table -->
     <table v-else class="trace-table">
       <thead>
         <tr>
           <th>Trace ID</th>
-          <th>Spans</th>
-          <th>Duration</th>
-          <th>Status</th>
+          <th @click="setSortField('span_count')" class="sortable">
+            Spans
+            <span v-if="sortBy === 'span_count'">
+              {{ sortOrder === 'desc' ? '↓' : '↑' }}
+            </span>
+          </th>
+          <th @click="setSortField('duration')" class="sortable">
+            Duration
+            <span v-if="sortBy === 'duration'">
+              {{ sortOrder === 'desc' ? '↓' : '↑' }}
+            </span>
+          </th>
+          <th @click="setSortField('status')" class="sortable">
+            Status
+            <span v-if="sortBy === 'status'">
+              {{ sortOrder === 'desc' ? '↓' : '↑' }}
+            </span>
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -115,5 +141,14 @@ onMounted(() => {
 .status-error {
   background-color: #f8d7da;
   color: #721c24;
+}
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortable:hover {
+  background-color: #f0f0f0;
 }
 </style>

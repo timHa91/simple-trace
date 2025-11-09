@@ -3,19 +3,10 @@ import axios from 'axios'
 import { TraceMapper } from '@/mapper/TraceMapper.ts'
 import type { TraceSummaryDto, TraceTreeDto } from '@/types/api.ts'
 import type { TraceFilter } from '@/types/filter.ts'
+import type { SortBy, SortOrder } from '@/types/sort.ts'
 
 export class TraceService {
   private apiUrl = 'http://localhost:8080/api/traces'
-
-  async getAllTraces(): Promise<Trace[]> {
-    try {
-      const response = await axios.get<TraceSummaryDto[]>(this.apiUrl)
-      return response.data.map((dto) => TraceMapper.fromDtoSummary(dto))
-    } catch (error) {
-      console.error('Error fetching traces', error)
-      throw error
-    }
-  }
 
   async getTrace(traceId: string): Promise<TraceTree> {
     try {
@@ -30,12 +21,16 @@ export class TraceService {
     }
   }
 
-  async getAllFilteredTraces(filter: TraceFilter): Promise<Trace[]> {
+  async getAllFilteredTraces(filter: TraceFilter, sortBy: SortBy, sortOrder: SortOrder): Promise<Trace[]> {
     // Build Query-Params
     const queryParams: Record<string, string | number> = {}
+    // Filter
     if (filter.serviceName && filter.serviceName.trim() !== '') queryParams.serviceName = filter.serviceName
     if (filter.minDuration) queryParams.minDuration = filter.minDuration
     if (filter.status) queryParams.status = filter.status
+    // Sort
+    queryParams.sortBy = sortBy
+    queryParams.sortOrder = sortOrder
 
     try {
       const response = await axios.get<TraceSummaryDto[]>(this.apiUrl, { params: queryParams })
