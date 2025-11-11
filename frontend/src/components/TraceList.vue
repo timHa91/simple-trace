@@ -1,27 +1,35 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import type { Trace } from '@/types/traces.ts'
-import { traceService } from '@/services/TraceService.ts'
-import type { TraceFilter } from '@/types/filter.ts'
-import type { SortBy, SortOrder } from '@/types/sort.ts'
+import {computed, onMounted, ref} from 'vue'
+import {Trace} from '@/types/traces.ts'
+import {TraceFilter} from '@/types/filter.ts'
+import {SortBy, TraceSort} from '@/types/sort.ts'
 
 const traces = ref<Trace[]>([])
 const isLoading = ref(false)
 const error = ref<string | null>(null)
 const filter = ref<TraceFilter>({})
-const sortBy = ref<SortBy>("duration")
-const sortOrder = ref<SortOrder>("desc")
+const appliedFilter = ref<TraceFilter>({})
+const sort = ref<TraceSort>({
+  sortOrder: "desc",
+  sortBy: "duration"
+})
+
+const props = defineProps<{
+  fetchTraces: (filter: TraceFilter, sort: TraceSort) => Promise<Trace[]>
+}>()
 
 async function loadTraces() {
+  if (isLoading.value) return
+
   isLoading.value = true
   error.value = null
 
   try {
-    traces.value = await traceService.getAllFilteredTraces(
+    traces.value = await props.fetchTraces(
       filter.value,
-      sortBy.value,
-      sortOrder.value
+      sort.value
     )
+    appliedFilter.value = { ...filter.value }
   } catch (err) {
     error.value = 'Failed to load traces: ' + (err instanceof Error ? err.message : String(err))
   } finally {
@@ -30,19 +38,33 @@ async function loadTraces() {
 }
 
 function resetFilter() {
-  filter.value = {}
-  loadTraces()
+  if (isFilterActive.value) {
+    filter.value = {}
+    loadTraces()
+  }
 }
 
 const isFilterActive = computed(() => {
-  return filter.value.status || filter.value.serviceName || filter.value.minDuration
+  return (
+    appliedFilter.value.status !== undefined ||
+    (appliedFilter.value.serviceName && appliedFilter.value.serviceName.trim() !== "") ||
+    appliedFilter.value.minDuration !== undefined
+  )
+})
+
+const isFilterDirty = computed( () => {
+  return(
+    filter.value.status !== appliedFilter.value.status ||
+    filter.value.minDuration != appliedFilter.value.minDuration ||
+    filter.value.serviceName != appliedFilter.value.serviceName
+  )
 })
 
 function setSortField(value: SortBy) {
-    if (sortBy.value === value) {
-      sortOrder.value = sortOrder.value === "desc" ? "asc" : "desc"
+    if (sort.value.sortBy === value) {
+      sort.value.sortOrder = sort.value.sortOrder === "desc" ? "asc" : "desc"
     } else {
-      sortBy.value = value
+      sort.value.sortBy = value
     }
     loadTraces()
 }
@@ -78,8 +100,8 @@ onMounted(() => {
       />
 
       <!-- Filter Buttons -->
-      <button @click="loadTraces()" :disabled="!isFilterActive || isLoading">Apply</button>
-      <button @click="resetFilter">Reset</button>
+      <button @click="loadTraces" :disabled="!isFilterDirty || isLoading">Apply</button>
+      <button @click="resetFilter" :disabled="!isFilterActive || isLoading">Reset</button>
     </div>
     <!-- Empty-State -->
     <div v-if="!isLoading && traces.length === 0">No traces found. Try adjusting your filters.</div>
@@ -91,20 +113,20 @@ onMounted(() => {
           <th>Trace ID</th>
           <th @click="setSortField('span_count')" class="sortable">
             Spans
-            <span v-if="sortBy === 'span_count'">
-              {{ sortOrder === 'desc' ? '↓' : '↑' }}
+            <span v-if="sort.sortBy === 'span_count'">
+              {{ sort.sortOrder === 'desc' ? '↓' : '↑' }}
             </span>
           </th>
           <th @click="setSortField('duration')" class="sortable">
             Duration
-            <span v-if="sortBy === 'duration'">
-              {{ sortOrder === 'desc' ? '↓' : '↑' }}
+            <span v-if="sort.sortBy === 'duration'">
+              {{ sort.sortOrder === 'desc' ? '↓' : '↑' }}
             </span>
           </th>
           <th @click="setSortField('status')" class="sortable">
             Status
-            <span v-if="sortBy === 'status'">
-              {{ sortOrder === 'desc' ? '↓' : '↑' }}
+            <span v-if="sort.sortBy === 'status'">
+              {{ sort.sortOrder === 'desc' ? '↓' : '↑' }}
             </span>
           </th>
         </tr>

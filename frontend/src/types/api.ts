@@ -1,4 +1,4 @@
-export type TraceSummaryDto = {
+export interface TraceSummaryDto {
   traceId: string
   totalDuration: number
   services: string[]
@@ -6,13 +6,13 @@ export type TraceSummaryDto = {
   overallStatus: number
 }
 
-export type TraceTreeDto = {
+export interface TraceTreeDto {
       traceId: string
       rootSpan: SpanDto
       orphans?: SpanDto[]
 }
 
-export type SpanDto = {
+export interface SpanDto {
       serviceName: string
       operation: string
       status: number

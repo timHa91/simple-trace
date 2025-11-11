@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { onBeforeRouteUpdate, useRoute } from 'vue-router'
-import { traceService } from '@/services/TraceService'
+import { traceService } from '@/services/TraceService.ts'
 import type { TraceTree } from '@/types/traces'
 import SpanNode from '@/components/SpanNode.vue'
 

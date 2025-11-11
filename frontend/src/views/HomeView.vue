@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import TraceList from '@/views/TraceList.vue'
 </script>
 
 <template>
-  <TraceList />
+  <h1>HOME</h1>
 </template>
 
 <style scoped></style>
